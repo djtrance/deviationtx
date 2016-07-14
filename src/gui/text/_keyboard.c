@@ -40,7 +40,7 @@ static void _make_box(struct guiBox *box, u16 x, u16 y, u16 width, u16 height)
 {
     box->x = x;
     box->y = y;
-    box->width = width + 2 ;
+    box->width = width +2 ;
     box->height = height -1;
 }
 

@@ -23,13 +23,13 @@
 enum {
     LABEL_X    = 0,
     LABEL_W    = 2*ITEM_SPACE,
-    TEXTSEL1_X = 3*ITEM_SPACE,
-    TEXTSEL1_W = 7*ITEM_SPACE,
-    TEXTSEL2_X = 12*ITEM_SPACE,
+    TEXTSEL1_X = 2*ITEM_SPACE,
+    TEXTSEL1_W = 10*ITEM_SPACE,
+    TEXTSEL2_X = 14*ITEM_SPACE,
     TEXTSEL2_W = 4*ITEM_SPACE,
     TEXTSEL3_X = 18*ITEM_SPACE,
     TEXTSEL3_W = 5*ITEM_SPACE,
-    MSG_X      = 10*ITEM_SPACE,
+    MSG_X      = 7*ITEM_SPACE,
     MSG_Y      = 5*ITEM_SPACE,
 };
 #include "../128x64x1/telemconfig_page.c"

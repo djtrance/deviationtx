@@ -19,6 +19,7 @@ All text above must be included in any redistribution
 #include <stdio.h>
 #include "gui/gui.h"
 #include "lcd.h"
+#include "lcd_page_props.h"
 
 #define ZOOM cur_str.font.zoom
 
@@ -48,20 +49,25 @@ void LCD_LoadFont(int idx, const char *file, int x_off, int y_off, int w, int h)
 }
 #include "../320x240x16/lcd_gfx.c"
 #else //MAPPED_GFX
+#define swap(x, y) {int __tmp = x; x = y; y = __tmp;}
+
 
 void LCD_DrawFastVLine(int16_t x, int16_t y, 
-                 int16_t h, uint16_t color) {
-    (void) x;
-    (void) y;
-    (void) h;
+                 int16_t h, uint16_t color) {    
     (void) color;
+    h+=y;
+    for(y; y<= h;y++){
+      LCD_PrintCharXY(x, y, 'l');
+    }
 }
 
 void LCD_DrawFastHLine(u16 x, u16 y, u16 w, u16 color) {
-    (void) x;
-    (void) y;
-    (void) w;
+   
     (void) color;
+    w+=x;
+    for(x; x<=w;x++){
+      LCD_PrintCharXY(x, y, '-');
+    }
 }
 
 void LCD_DrawDashedHLine(int16_t x, int16_t y, 
@@ -100,17 +106,91 @@ void LCD_FillCircle(u16 x0, u16 y0, u16 r, u16 color)
   (void) color;
 }
 
-
+#if 0
 // bresenham's algorithm - thx wikpedia
 void LCD_DrawLine(u16 x0, u16 y0, u16 x1, u16 y1, u16 color)
 {
-  (void) x0;
-  (void) y0;
-  (void) x1;
-  (void) y1;
+ 
   (void) color;
-}
+  u16 m = (x1 - x0)/ (y1 - y0);
+  unsigned c;
+  if(m == 0){
+    c='-';
+  }else if(m >0){
+    if(m<=0.5){
+      c='.';
+      }else{
+      c= LCD_CENTER_DOT;
+    }
 
+  }else{
+    if(m<= -0.5){
+      c='.';
+      }else{
+      c= LCD_CENTER_DOT;
+    }
+
+  }
+
+  
+  for(x0; x0 <= x1; x0++){
+    LCD_PrintCharXY(x0, y1 = m*(x0), c);
+  }
+
+  
+}
+#endif
+#if 1
+void LCD_DrawLine(u16 x0, u16 y0, u16 x1, u16 y1, u16 color)
+{
+  int steep = abs(y1 - y0) > abs(x1 - x0);
+  if (steep) {
+    swap(x0, y0);
+    swap(x1, y1);
+  }
+
+  if (x0 > x1) {
+    swap(x0, x1);
+    swap(y0, y1);
+  }
+
+  int dx, dy;
+  dx = x1 - x0;
+  dy = abs(y1 - y0);
+
+  int err = dx / 2;
+  int ystep;
+
+  if (y0 < y1) {
+    ystep = 1;
+  } else {
+    ystep = -1;
+  }
+
+  for (; x0<=x1; x0++) {
+    if (steep) {
+      if((x1-x0)<=0)
+      LCD_PrintCharXY(y0, x0, '.');
+      else 
+        if((y0-y1)<=0)
+          LCD_PrintCharXY(x0, y0, '-');
+        else
+          LCD_PrintCharXY(y0, x0, 'l');
+
+    } else {
+      if((x1-x0)<=0)
+      LCD_PrintCharXY(x0, y0, '-');
+      else
+      LCD_PrintCharXY(x0, y0, LCD_CENTER_DOT);
+    }
+    err -= dy;
+    if (err < 0) {
+      y0 += ystep;
+      err += dx;
+    }
+  }
+}
+#endif
 // draw a rectangle
 void LCD_DrawRect(u16 x, u16 y, u16 w, u16 h, u16 color)
 {

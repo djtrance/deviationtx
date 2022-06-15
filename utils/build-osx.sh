@@ -2,7 +2,7 @@
 
 mkdir deviation-build
 cd deviation-build
-curl -o fltk-1.3.0-source.tar.gz http://ftp.easysw.com/pub/fltk/1.3.0/fltk-1.3.0-source.tar.gz
+curl -o -k  fltk-1.3.0-source.tar.gz http://ftp.easysw.com/pub/fltk/1.3.0/fltk-1.3.0-source.tar.gz
 tar xzvf fltk-1.3.0-source.tar.gz
 cd fltk-1.3.0
 ./configure
@@ -10,7 +10,7 @@ make
 sudo make install
 cd ..
 
-curl -o pa_stable_v19_20111121.tgz http://www.portaudio.com/archives/pa_stable_v19_20111121.tgz
+curl -o -k pa_stable_v19_20111121.tgz http://www.portaudio.com/archives/pa_stable_v19_20111121.tgz
 tar xzvf pa_stable_v19_20111121.tgz
 cd portaudio
 ./configure

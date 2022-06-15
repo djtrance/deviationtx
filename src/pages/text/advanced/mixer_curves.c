@@ -33,9 +33,9 @@ enum {
     TEXTSEL2_W = 6*ITEM_SPACE,
     VALUE_X    = 8*ITEM_SPACE,
     VALUE_Y_OFFSET = 0,
-    GRAPH_X = 44,
-    GRAPH_Y = 6,
-    GRAPH_W = 6,
-    GRAPH_H = 4,
+    GRAPH_X = LCD_WIDTH - 13*ITEM_SPACE,
+    GRAPH_Y = 4,
+    GRAPH_W = 10,
+    GRAPH_H = 7,
 };
 #include "../../128x64x1/advanced/mixer_curves.c"

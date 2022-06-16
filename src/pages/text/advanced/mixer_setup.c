@@ -47,7 +47,7 @@ enum {
    LABEL_W    = 9*ITEM_SPACE,
    TEXTSEL_X  = 12*ITEM_SPACE,
    TEXTSEL_W  = 9*ITEM_SPACE,
-   GRAPH_X    =  LCD_WIDTH - 13*ITEM_SPACE,
+   GRAPH_X    =  46,//LCD_WIDTH - 13*ITEM_SPACE,
    GRAPH_Y    = 4,
    GRAPH_W    = 9,
    GRAPH_H    = 7,

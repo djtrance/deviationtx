@@ -172,15 +172,9 @@ void LCD_DrawLine(u16 x0, u16 y0, u16 x1, u16 y1, u16 color)
       if((x1-x0)<=0)
       LCD_PrintCharXY(y0, x0, '.');
       else 
-        if((y0-y1)<=0)
-          LCD_PrintCharXY(x0, y0, '-');
-        else
-          LCD_PrintCharXY(y0, x0, 'l');
+      LCD_PrintCharXY(y0, x0, 'l');
 
     } else {
-      if((x1-x0)<=0)
-      LCD_PrintCharXY(x0, y0, '-');
-      else
       LCD_PrintCharXY(x0, y0, LCD_CENTER_DOT);
     }
     err -= dy;

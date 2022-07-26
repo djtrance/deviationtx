@@ -53,6 +53,8 @@
 #define PACKET_PERIOD_MT 2625 // Timeout for callback in uSec
 #define PACKET_PERIOD_YZ 3125 // Yi Zhan i6S
 #define PACKET_PERIOD_FY 2460 // Fayee FY805
+#define MT99XX_PACKET_PERIOD_A180	3400
+#define PACKET_PERIOD_F949G	3450 //F949G
 #define INITIAL_WAIT     500
 #define PACKET_SIZE 9
 
@@ -92,6 +94,8 @@ enum {
 #define CHANNEL_SNAPSHOT CHANNEL7
 #define CHANNEL_VIDEO    CHANNEL8
 #define CHANNEL_HEADLESS CHANNEL9
+#define CHANNEL_3D6G     CHANNEL5
+#define CHANNEL_F949G_LIGHT CHANNEL6
 
 enum{
     // flags going to packet[6] (MT99xx, H7)
@@ -116,6 +120,11 @@ enum{
     // flags going to packet[7] (FY805)
     FLAG_FY805_HEADLESS= 0x10,
 };
+enum{
+    // flags going to packet[6] (F949G)
+    FLAG_F949G_LIGHT	= 0x01,
+    FLAG_F949G_3D6G		= 0x20,
+};
 
 enum {
     MT99XX_INIT = 0,
@@ -124,7 +133,7 @@ enum {
 };
 
 static const char * const mt99xx_opts[] = {
-    _tr_noop("Format"), "MT9916", "H7", "YZ i6S", "LS114", "FY805", NULL,
+    _tr_noop("Format"), "MT9916", "H7", "YZ i6S", "LS114", "FY805", "F949G",NULL,
     NULL
 };
 
@@ -140,6 +149,8 @@ enum {
     PROTOOPTS_FORMAT_YZ,
     PROTOOPTS_FORMAT_LS,
     PROTOOPTS_FORMAT_FY805,
+    PROTOOPTS_FORMAT_F949G,
+
 };
 
 static u8 packet[PACKET_SIZE];
@@ -249,6 +260,12 @@ static void mt99xx_send_packet()
                 packet[7] += packet[idx];
             packet[8] = 0xff;
             break;
+        case PROTOOPTS_FORMAT_F949G:
+            	packet[6] = 0x02
+							  | GET_FLAG( CHANNEL_3D6G, FLAG_F949G_3D6G )
+							  | GET_FLAG( CHANNEL6, FLAG_F949G_LIGHT );
+					packet[7] = 0x00;
+            break;
     }
     
     if (Model.proto_opts[PROTOOPTS_FORMAT] == PROTOOPTS_FORMAT_LS) {
@@ -265,7 +282,7 @@ static void mt99xx_send_packet()
     XN297_WritePayload(packet, PACKET_SIZE);
     
     rf_chan++;
-    if(Model.proto_opts[PROTOOPTS_FORMAT] == PROTOOPTS_FORMAT_YZ) {
+    if(Model.proto_opts[PROTOOPTS_FORMAT] == PROTOOPTS_FORMAT_YZ || Model.proto_opts[PROTOOPTS_FORMAT] == PROTOOPTS_FORMAT_F949G) {
         rf_chan++; // skip every other channel
     }
         
@@ -289,6 +306,8 @@ static void mt99xx_init()
     NRF24L01_Initialize();
     if( Model.proto_opts[PROTOOPTS_FORMAT] == PROTOOPTS_FORMAT_YZ)
         XN297_SetScrambledMode(XN297_UNSCRAMBLED);
+    else if(Model.proto_opts[PROTOOPTS_FORMAT] == PROTOOPTS_FORMAT_F949G)
+        XN297_SetScrambledMode(XN297_SCRAMBLED);
     NRF24L01_SetTxRxMode(TX_EN);
     NRF24L01_FlushTx();
     for(u8 i=0; i<5; i++)
@@ -299,7 +318,7 @@ static void mt99xx_init()
     NRF24L01_WriteReg(NRF24L01_02_EN_RXADDR, 0x01);  // Enable data pipe 0 only
     NRF24L01_WriteReg(NRF24L01_03_SETUP_AW, 0x03);  // 5 bytes address
     NRF24L01_WriteReg(NRF24L01_04_SETUP_RETR, 0x00);// no auto retransmit
-    if(Model.proto_opts[PROTOOPTS_FORMAT] == PROTOOPTS_FORMAT_YZ)
+    if(Model.proto_opts[PROTOOPTS_FORMAT] == PROTOOPTS_FORMAT_YZ || Model.proto_opts[PROTOOPTS_FORMAT] == PROTOOPTS_FORMAT_F949G)
         NRF24L01_SetBitrate(NRF24L01_BR_250K);     // 250Kbps (nRF24L01+ only)
     else
         NRF24L01_SetBitrate(NRF24L01_BR_1M);          // 1Mbps
@@ -332,6 +351,10 @@ static void initialize_txid()
     else if(Model.proto_opts[PROTOOPTS_FORMAT] == PROTOOPTS_FORMAT_FY805) {
         txid[0] = 0x81;
         txid[1] = 0x0f;
+    }
+    else if(Model.proto_opts[PROTOOPTS_FORMAT] == PROTOOPTS_FORMAT_F949G ){
+        txid[0] = 0x7E;	// LilTeo14 ID
+		txid[1] = 0x2F;
     }
     checksum_offset = (Model.proto_opts[PROTOOPTS_FORMAT] == PROTOOPTS_FORMAT_LS) ? 0xcc : 0;
     checksum_offset += txid[0];
@@ -431,6 +454,13 @@ static void initialize()
             packet[2] = 0x12;
             packet[3] = 0x17;
             break;
+        case PROTOOPTS_FORMAT_F949G:
+            packet_period = PACKET_PERIOD_F949G; //segunda prueba con f949g
+            packet[0] = 0x20;
+            packet[1] = 0x14;
+            packet[2] = 0x03;
+            packet[3] = 0x25;
+            break;
     }
     
     if(Model.proto_opts[PROTOOPTS_FORMAT] == PROTOOPTS_FORMAT_LS) {
@@ -444,8 +474,11 @@ static void initialize()
         packet[6] = 0x00; // 3th byte for data state tx address (always 0x00 ?)
     }
     packet[7] = checksum_offset; // checksum offset
+
     packet[8] = 0xAA; // fixed
-    
+    if(Model.proto_opts[PROTOOPTS_FORMAT] == PROTOOPTS_FORMAT_F949G) {
+        packet[8] = 0x00;
+        }
     PROTOCOL_SetBindState(BIND_COUNT * packet_period / 1000);
     CLOCK_StartTimer(INITIAL_WAIT, mt99xx_callback);
 }

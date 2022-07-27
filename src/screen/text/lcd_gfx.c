@@ -143,6 +143,7 @@ void LCD_DrawLine(u16 x0, u16 y0, u16 x1, u16 y1, u16 color)
 #if 1
 void LCD_DrawLine(u16 x0, u16 y0, u16 x1, u16 y1, u16 color)
 {
+  (void) color;
   int steep = abs(y1 - y0) > abs(x1 - x0);
   if (steep) {
     swap(x0, y0);
@@ -307,5 +308,7 @@ void LCD_DrawUSBLogo(int lcd_width, int lcd_height)
   LCD_SetFontColor(0xffff);
   LCD_GetStringDimensions((u8 *)_tr("Deviation\n   USB"), &width, &height);
   printf("(%d, %d)- > (%d, %d)", lcd_width, lcd_height, width, height);
+  LCD_SetFontColor(0x7E0);
   LCD_PrintStringXY((lcd_width - width)/2, lcd_height/2-1, _tr("Deviation\n   USB"));
+  LCD_SetFontColor(0xffff);
 }
